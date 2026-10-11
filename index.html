@@ -656,6 +656,7 @@
                 badgeColor: "bg-black/80 text-orange-400 border border-gray-700",
                 price: 28.90,
                 image: "images/insano-bacon.jpg",
+                imagePosition: "center 38%",
                 ingredients: "Carne 100% bovina, queijo, bacon duplo, alface ou rúcula, tomate e cebola roxa, maionese, ketchup e mostarda.",
                 removableIngredients: [
                     "Bacon Duplo",
@@ -794,7 +795,7 @@
                         ` : ''}
 
                         <div class="relative h-64 overflow-hidden">
-                            <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                            <img src="${item.image}" alt="${item.name}" style="object-position: ${item.imagePosition || 'center'}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
                             <div class="absolute top-4 ${item.isSpicyRibbon ? 'left-4' : 'right-4'} ${item.badgeColor || 'bg-black/80 text-orange-400'} px-3 py-1 rounded-full text-xs font-bold">
                                 ${item.badge}
                             </div>
@@ -878,6 +879,7 @@
             currentExtraMeat = 0;
 
             document.getElementById('modal-img').src = item.image;
+            document.getElementById('modal-img').style.objectPosition = item.imagePosition || 'center';
             document.getElementById('modal-title').textContent = item.name;
             document.getElementById('modal-base-price').textContent = formatBRL(item.price);
             document.getElementById('modal-desc').textContent = item.ingredients;
