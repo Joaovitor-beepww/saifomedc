@@ -383,7 +383,7 @@
                                 <span class="text-lg">🛵</span>
                                 <span class="font-bold text-sm text-white">Delivery</span>
                             </div>
-                            <span class="text-xs text-orange-400 font-bold">+ R$ 5,00 (Dois Córregos)</span>
+                            <span class="text-xs text-orange-400 font-bold">+ R$ 8,00 (Dois Córregos)</span>
                         </label>
                         <label class="delivery-option-card cursor-pointer bg-black/40 border-2 border-gray-800 rounded-xl p-3 flex flex-col justify-between transition-all" id="opt-pickup-label">
                             <input type="radio" name="order_delivery" value="pickup" onchange="toggleDeliveryType()" class="hidden">
@@ -453,11 +453,11 @@
                     <!-- Detalhes do Pagamento -->
                     <div id="pix-details-box" class="bg-black/50 border border-green-500/30 rounded-xl p-3 text-xs space-y-2">
                         <div class="flex items-center justify-between text-green-400 font-bold">
-                            <span>⚡ Chave PIX (Telefone Oficial):</span>
+                            <span>⚡ Chave PIX (E-mail):</span>
                             <button type="button" onclick="copyPixKey()" class="bg-green-600 hover:bg-green-500 text-white px-2 py-0.5 rounded text-[11px] font-bold">Copiar</button>
                         </div>
-                        <div class="bg-black/70 p-2 rounded border border-gray-800 text-gray-200 font-mono text-center tracking-wider">
-                            14997731523
+                        <div class="bg-black/70 p-2 rounded border border-gray-800 text-gray-200 font-mono text-center break-all select-all">
+                            romulossjunior2@gmail.com
                         </div>
                         <p class="text-gray-400 text-[11px]">Você poderá enviar o comprovante diretamente na conversa do WhatsApp!</p>
                     </div>
@@ -495,7 +495,7 @@
             </div>
             <div class="flex justify-between text-xs text-gray-400">
                 <span>Taxa de Entrega:</span>
-                <span id="cart-delivery-fee" class="text-orange-400 font-bold">R$ 5,00</span>
+                <span id="cart-delivery-fee" class="text-orange-400 font-bold">R$ 8,00</span>
             </div>
             <div class="flex justify-between text-lg font-bold text-white border-t border-dashed border-gray-800 pt-2">
                 <span>Total a Pagar:</span>
@@ -726,6 +726,14 @@
             { id: "add_presunto", name: "Presunto", price: 3.50 }
         ];
 
+        // VALORES GERAIS
+        const DELIVERY_FEE = 8.00;          // Taxa de entrega (Dois Córregos)
+        const EXTRA_MEAT_PRICE = 8.00;      // Acréscimo por carne extra
+        const EXTRA_MEAT_MAX = 5;
+        const PIX_KEY = "romulossjunior2@gmail.com";
+
+        let currentExtraMeat = 0;
+
         let cart = [];
         let currentModalItem = null;
         let currentQuantity = 1;
@@ -867,6 +875,7 @@
 
             currentModalItem = item;
             currentQuantity = 1;
+            currentExtraMeat = 0;
 
             document.getElementById('modal-img').src = item.image;
             document.getElementById('modal-title').textContent = item.name;
@@ -993,6 +1002,20 @@
                         </div>
                         <p class="text-[11px] text-gray-400 mb-3">Escolha os acréscimos para o seu lanche:</p>
                         <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/40">
+                                <span class="text-xs font-medium text-gray-200 flex items-center gap-2">
+                                    <span>🥩</span>
+                                    <span>Carne extra <span class="text-gray-400">(por carne)</span></span>
+                                </span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-bold text-orange-400">+ ${formatBRL(EXTRA_MEAT_PRICE)}</span>
+                                    <div class="flex items-center gap-2 bg-black/80 border border-gray-800 rounded-lg px-2 py-0.5 text-xs">
+                                        <button type="button" onclick="changeExtraMeat(-1)" class="text-white hover:text-orange-500 font-bold px-1">-</button>
+                                        <span id="extra-meat-qty" class="font-bold text-white min-w-[14px] text-center">0</span>
+                                        <button type="button" onclick="changeExtraMeat(1)" class="text-white hover:text-orange-500 font-bold px-1">+</button>
+                                    </div>
+                                </div>
+                            </div>
                             ${ADDONS.map(add => `
                                 <label class="flex items-center justify-between p-2.5 rounded-lg bg-black/40 border border-gray-800 hover:border-orange-500/50 cursor-pointer">
                                     <span class="text-xs font-medium text-gray-200 flex items-center gap-2">
@@ -1036,8 +1059,20 @@
                 unitTotal += parseFloat(cb.getAttribute('data-price') || 0);
             });
 
+            unitTotal += currentExtraMeat * EXTRA_MEAT_PRICE;
+
             const finalTotal = unitTotal * currentQuantity;
             document.getElementById('modal-total-price').textContent = formatBRL(finalTotal);
+        }
+
+        function changeExtraMeat(delta) {
+            const newQty = currentExtraMeat + delta;
+            if (newQty >= 0 && newQty <= EXTRA_MEAT_MAX) {
+                currentExtraMeat = newQty;
+                const el = document.getElementById('extra-meat-qty');
+                if (el) el.textContent = currentExtraMeat;
+                updateModalTotal();
+            }
         }
 
         function changeModalQty(delta) {
@@ -1082,6 +1117,11 @@
 
                 const addons = [];
                 let addonsTotal = 0;
+                if (currentExtraMeat > 0) {
+                    const meatPrice = currentExtraMeat * EXTRA_MEAT_PRICE;
+                    addons.push({ name: `${currentExtraMeat}x Carne extra`, price: meatPrice });
+                    addonsTotal += meatPrice;
+                }
                 document.querySelectorAll('input[name="opt_addons"]:checked').forEach(cb => {
                     const price = parseFloat(cb.getAttribute('data-price') || 0);
                     addons.push({ name: cb.value, price });
@@ -1155,7 +1195,7 @@
                 picLabel.classList.add('border-gray-800');
                 picLabel.classList.remove('border-orange-500');
                 if (addrBox) addrBox.classList.remove('hidden');
-                if (feeEl) feeEl.textContent = formatBRL(5.00);
+                if (feeEl) feeEl.textContent = formatBRL(DELIVERY_FEE);
             } else {
                 picLabel.classList.add('border-orange-500');
                 picLabel.classList.remove('border-gray-800');
@@ -1200,7 +1240,7 @@
 
         function updateCartTotals() {
             const subtotal = cart.reduce((acc, it) => acc + (it.unitPrice * it.quantity), 0);
-            const deliveryFee = currentDeliveryType === 'delivery' ? 5.00 : 0.00;
+            const deliveryFee = currentDeliveryType === 'delivery' ? DELIVERY_FEE : 0.00;
             const total = subtotal + deliveryFee;
 
             const subEl = document.getElementById('cart-subtotal');
@@ -1303,10 +1343,10 @@
         }
 
         function copyPixKey() {
-            navigator.clipboard.writeText("14997731523").then(() => {
-                showToast("Chave PIX (14997731523) copiada!");
+            navigator.clipboard.writeText(PIX_KEY).then(() => {
+                showToast(`Chave PIX (${PIX_KEY}) copiada!`);
             }).catch(() => {
-                showToast("Chave PIX: 14997731523");
+                showToast(`Chave PIX: ${PIX_KEY}`);
             });
         }
 
@@ -1355,7 +1395,7 @@
             const notes = document.getElementById('cust-notes')?.value?.trim() || '';
 
             const subtotal = cart.reduce((acc, it) => acc + (it.unitPrice * it.quantity), 0);
-            const deliveryFee = currentDeliveryType === 'delivery' ? 5.00 : 0.00;
+            const deliveryFee = currentDeliveryType === 'delivery' ? DELIVERY_FEE : 0.00;
             const total = subtotal + deliveryFee;
 
             const orderNum = Math.floor(1000 + Math.random() * 9000);
@@ -1453,7 +1493,7 @@
             if (order.payment.method === 'Dinheiro' && order.payment.changeInfo) {
                 m += ` (${order.payment.changeInfo})`;
             } else if (order.payment.method === 'PIX') {
-                m += ` (Chave: 14997731523)`;
+                m += ` (Chave: ${PIX_KEY})`;
             }
             m += `\n`;
 
