@@ -691,6 +691,27 @@
                 hasSausageChoice: true,
                 isDrink: false
             },
+                        {
+                id: "supremo",
+                name: "Supremo",
+                category: "lanches",
+                badge: "🍟 COM BATATA CORTESIA 🥓",
+                badgeColor: "bg-gradient-to-r from-orange-600 to-amber-600 text-white font-extrabold shadow-md",
+                price: 46.90,
+                image: "images/supremo.jpg",
+                imagePosition: "center 45%",
+                ingredients: "Pão brioche selado, dobro de carne artesanal, dobro de bacon crocante, dobro de queijo, dobro de cheddar cremoso ou catupiry original, alface ou rúcula, tomate e cebola roxa, catchup, mostarda e maionese especial. Acompanha batata cheddar e bacon de cortesia!",
+                removableIngredients: [
+                    "Cebola Roxa",
+                    "Tomate",
+                    "Dobro de Bacon",
+                    "Dobro de Queijo",
+                    "Maionese",
+                    "Catchup e Mostarda"
+                ],
+                hasCheeseChoice: true,
+                isDrink: false
+            },
             // BEBIDAS SOLICITADAS A R$ 7,00:
             {
                 id: "coca_lata_tradicional",
@@ -946,6 +967,41 @@
                     `;
                 }
 
+                                // Supremo: Cheddar ou Catupiry choice
+                if (item.hasCheeseChoice) {
+                    optionsHtml += `
+                        <div class="bg-black/40 p-4 rounded-xl border border-gray-800">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                                    2. Escolha: Dobro de Cheddar ou Catupiry
+                                </label>
+                                <span class="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-bold uppercase">Obrigatório</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center p-2.5 rounded-lg bg-gray-900/60 border border-gray-800 hover:border-orange-500/50 cursor-pointer gap-2">
+                                    <input type="radio" name="opt_cheese" value="Dobro de Cheddar" checked class="accent-orange-500">
+                                    <span class="text-xs font-medium text-white">🧀 Dobro de Cheddar</span>
+                                </label>
+                                <label class="flex items-center p-2.5 rounded-lg bg-gray-900/60 border border-gray-800 hover:border-orange-500/50 cursor-pointer gap-2">
+                                    <input type="radio" name="opt_cheese" value="Dobro de Catupiry" class="accent-orange-500">
+                                    <span class="text-xs font-medium text-white">🧀 Dobro de Catupiry</span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (item.id === 'supremo') {
+                    optionsHtml += `
+                        <div class="bg-gradient-to-r from-amber-950/40 to-orange-950/40 p-3.5 rounded-xl border border-orange-500/50 flex items-center gap-3">
+                            <span class="text-3xl">🍟</span>
+                            <div>
+                                <p class="text-xs font-bold text-orange-400 uppercase tracking-wider">Cortesia Especial Inclusa</p>
+                                <p class="text-[11px] text-gray-300">Acompanha Batata com Cheddar e Bacon de cortesia!</p>
+                            </div>
+                        </div>
+                    `;
+                }
                 // Ponto da Carne
                 optionsHtml += `
                     <div class="bg-black/40 p-4 rounded-xl border border-gray-800">
@@ -1111,6 +1167,7 @@
                 const salad = document.querySelector('input[name="opt_salad"]:checked')?.value || 'Alface Americana';
                 const meat = document.querySelector('input[name="opt_meat"]:checked')?.value || 'Ao Ponto';
                 const sausage = document.querySelector('input[name="opt_sausage"]:checked')?.value;
+                const cheese = document.querySelector('input[name="opt_cheese"]:checked')?.value;
                 const note = document.getElementById('modal-item-note')?.value?.trim() || '';
 
                 const removals = [];
@@ -1142,6 +1199,7 @@
                     salad,
                     meat,
                     sausage,
+                    cheese,
                     removals,
                     addons,
                     note
@@ -1303,6 +1361,8 @@
                 } else {
                     details.push(`Salada: ${item.salad} | Ponto: ${item.meat}`);
                     if (item.sausage) details.push(`Linguica: ${item.sausage}`);
+                    if (item.cheese) details.push(`Recheio: ${item.cheese}`);
+                    if (item.name === "Supremo") details.push(`<span class="text-amber-400 font-semibold">🍟 Batata Cheddar e Bacon de cortesia!</span>`);
 
                     if (item.removals && item.removals.length > 0) {
                         details.push(`<span class="text-red-400 font-bold">Retirar: ${item.removals.join(', ')}</span>`);
@@ -1473,6 +1533,12 @@
                     }
                     if (item.sausage) {
                         m += `- Linguica: ${item.sausage}\n`;
+                    }
+                    if (item.cheese) {
+                        m += `- Recheio: ${item.cheese}\n`;
+                    }
+                    if (item.name === "Supremo") {
+                        m += `- *Cortesia:* Acompanha Batata Cheddar e Bacon\n`;
                     }
                     if (item.removals && item.removals.length > 0) {
                         m += `- RETIRAR: ${item.removals.join(', ')}\n`;
