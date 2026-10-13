@@ -31,7 +31,6 @@
             font-family: 'Oswald', sans-serif;
         }
 
-        /* Prevenção de zoom automático chato no Android / iOS ao focar em inputs */
         input, select, textarea {
             font-size: 16px !important;
         }
@@ -55,7 +54,6 @@
             }
         }
 
-        /* Hero Banner Sai Fome com fundo Laranja vibrante */
         .hero-section {
             background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
             position: relative;
@@ -72,7 +70,6 @@
             pointer-events: none;
         }
 
-        /* Modal Overlay & Bottom Sheet para Mobile */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -105,7 +102,6 @@
             }
         }
 
-        /* Cart Drawer Mobile e Desktop */
         .cart-drawer {
             position: fixed;
             top: 0; right: -100%;
@@ -133,7 +129,6 @@
             right: 0 !important;
         }
 
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
@@ -146,7 +141,6 @@
             border-radius: 999px;
         }
 
-        /* Toast notification */
         .toast-box {
             position: fixed;
             bottom: 80px;
@@ -186,7 +180,6 @@
     <nav class="bg-[#0a0a0a]/95 backdrop-blur-md fixed w-full z-50 border-b border-orange-500/30">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo Sai Fome Oficial -->
                 <div class="flex-shrink-0 flex items-center gap-1 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
                     <span class="text-2xl sm:text-3xl font-extrabold tracking-tight brand-font flex items-center gap-1 leading-none">
                         <span class="text-green-600">Sai</span>
@@ -202,7 +195,6 @@
                     </div>
                 </div>
 
-                <!-- Botões no Header: Pedidos Gravados + Sacola + WhatsApp -->
                 <div class="flex items-center gap-2 sm:gap-3">
                     <button onclick="openHistoryModal()" class="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-gray-800 transition-colors" title="Ver histórico de pedidos gravados">
                         <i class="fa-solid fa-clock-rotate-left text-orange-500"></i>
@@ -210,14 +202,12 @@
                         <span id="nav-saved-count" class="bg-orange-500 text-black font-bold px-1.5 py-0.5 rounded-full text-[10px]">0</span>
                     </button>
 
-                    <!-- Botão Sacola -->
                     <button onclick="openCart()" class="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm shadow-lg shadow-orange-500/30">
                         <i class="fa-solid fa-bag-shopping text-sm sm:text-base"></i>
                         <span>Sacola</span>
                         <span id="cart-badge-count" class="bg-black text-white text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full">0</span>
                     </button>
 
-                    <!-- Botão WhatsApp direto -->
                     <a href="https://wa.me/5514997731523" target="_blank" class="hidden md:flex bg-green-600 hover:bg-green-500 text-white px-5 py-2 rounded-full font-bold transition-colors items-center gap-2 text-sm shadow-md shadow-green-600/30">
                         <i class="fa-brands fa-whatsapp text-lg"></i> (14) 99773-1523
                     </a>
@@ -718,7 +708,7 @@
             container.innerHTML = items.map(item => {
                 if (item.isFeatured) {
                     return `
-                        <div class="burger-card rounded-2xl overflow-hidden border border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.25)] flex flex-col h-full lg:col-start-2">
+                        <div class="burger-card rounded-2xl overflow-hidden border border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.25)] flex flex-col h-full">
                             <div class="bg-orange-500 text-black text-center py-1.5 font-bold tracking-widest uppercase text-sm">
                                 🔥 O Mais Pedido 🔥
                             </div>
