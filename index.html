@@ -183,11 +183,14 @@
     <nav class="bg-[#0a0a0a]/95 backdrop-blur-md fixed w-full z-50 border-b border-orange-500/30">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <div class="flex-shrink-0 flex items-center gap-1 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <span class="text-2xl sm:text-3xl font-extrabold tracking-tight brand-font flex items-center gap-1 leading-none">
-                        <span class="text-green-600">Sai</span>
-                        <span class="text-orange-500 flex items-center gap-1">Fome <i class="fa-solid fa-burger text-orange-500 text-lg sm:text-xl"></i></span>
-                    </span>
+                <div class="flex-shrink-0 flex items-center gap-2 sm:gap-3">
+                    <div class="flex items-center gap-1 cursor-pointer select-none" onclick="handleLogoClick()" title="Sai Fome">
+                        <span class="text-2xl sm:text-3xl font-extrabold tracking-tight brand-font flex items-center gap-1 leading-none">
+                            <span class="text-green-600">Sai</span>
+                            <span class="text-orange-500 flex items-center gap-1">Fome <i class="fa-solid fa-burger text-orange-500 text-lg sm:text-xl"></i></span>
+                        </span>
+                    </div>
+                    <div id="nav-store-status-badge" class="flex items-center"></div>
                 </div>
 
                 <div class="hidden md:block">
@@ -218,6 +221,14 @@
             </div>
         </div>
     </nav>
+
+    <!-- Banner Superior de Loja Fechada -->
+    <div id="store-closed-banner" class="hidden fixed top-16 sm:top-20 left-0 right-0 z-40 bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-500/60 p-3 text-center shadow-2xl backdrop-blur-md">
+        <div class="max-w-4xl mx-auto flex items-center justify-center gap-2 text-xs sm:text-sm text-red-100 font-medium">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400 animate-ping"></span>
+            <span><strong>LOJA FECHADA NO MOMENTO:</strong> Horário de atendimento: <span id="closed-banner-schedule">Quarta a Domingo das 19h00 às 23h45</span>. Pedidos pausados!</span>
+        </div>
+    </div>
 
     <!-- Hero Section Oficial Sai Fome -->
     <div class="hero-section min-h-[60vh] flex items-center justify-center pt-20">
@@ -295,7 +306,13 @@
                     <i class="fa-solid fa-phone text-green-500"></i> Pedidos pelo: <span class="text-white">(14) 99773-1523</span>
                 </a>
             </div>
-            <p class="text-gray-700 text-sm">© 2026 Sai Fome Delivery. Todos os direitos reservados.</p>
+            <div class="mt-4 flex items-center justify-center gap-2 text-gray-700 text-xs">
+                <span>© 2026 Sai Fome Delivery. Todos os direitos reservados.</span>
+                <span>•</span>
+                <button onclick="openAdminModal()" class="text-gray-600 hover:text-orange-400 transition-colors flex items-center gap-1 py-1 px-1.5 rounded" title="Acesso do Administrador">
+                    <i class="fa-solid fa-lock text-[10px]"></i> ADM
+                </button>
+            </div>
         </div>
     </footer>
 
@@ -329,8 +346,8 @@
                     <span id="modal-qty" class="text-white font-bold text-base min-w-[20px] text-center">1</span>
                     <button onclick="changeModalQty(1)" class="text-white hover:text-orange-500 text-xl font-bold px-2">+</button>
                 </div>
-                <button onclick="confirmAddToCart()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-between text-base shadow-lg shadow-green-600/30">
-                    <span>Adicionar à Sacola</span>
+                <button onclick="confirmAddToCart()" id="btn-modal-add" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-between text-base shadow-lg shadow-green-600/30">
+                    <span id="btn-modal-add-label">Adicionar à Sacola</span>
                     <span id="modal-total-price" class="brand-font text-lg font-extrabold text-orange-300"></span>
                 </button>
             </div>
@@ -533,6 +550,107 @@
         </div>
     </div>
 
+    <!-- MODAL DO ADMINISTRADOR -->
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-card-mobile bg-[#18181b] border border-orange-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">✕</button>
+
+            <!-- Login do Admin (se não autenticado) -->
+            <div id="admin-login-view">
+                <div class="text-center mb-6">
+                    <div class="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl border border-orange-500/40">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white brand-font uppercase">Área do Administrador</h3>
+                    <p class="text-gray-400 text-xs mt-1">Acesso exclusivo para o dono da Sai Fome</p>
+                </div>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5 text-left">PIN de Acesso</label>
+                        <input type="password" id="admin-pin-input" maxlength="12" placeholder="Digite seu PIN (Padrão: 1234)" class="w-full text-center tracking-widest text-lg bg-black/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 font-mono">
+                    </div>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-extrabold py-3.5 rounded-xl uppercase tracking-wider text-sm transition-all shadow-lg shadow-orange-500/30">
+                        Entrar no Painel
+                    </button>
+                    <p class="text-[11px] text-gray-500 text-center">PIN padrão: <strong>1234</strong> (você pode alterar depois de entrar)</p>
+                </form>
+            </div>
+
+            <!-- Painel de Controle (quando autenticado) -->
+            <div id="admin-control-view" class="hidden space-y-5">
+                <div class="text-center border-b border-gray-800 pb-3">
+                    <span class="text-[10px] uppercase tracking-widest bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded-full border border-orange-500/30">Painel do Dono</span>
+                    <h3 class="text-2xl font-bold text-white brand-font mt-1">Status da Hamburgueria</h3>
+                    <p class="text-gray-400 text-xs">O que você marcar aqui atualiza na nuvem para todos os clientes.</p>
+                </div>
+
+                <!-- Status Atual -->
+                <div id="admin-current-status-box" class="p-4 rounded-xl border text-center transition-all">
+                    <!-- Preenchido pelo JS: status em tempo real -->
+                </div>
+
+                <!-- Opções de Modo -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Escolha como a loja deve ficar agora:</label>
+                    
+                    <button type="button" onclick="setStoreMode('auto')" id="btn-mode-auto" class="w-full p-3 rounded-xl border transition-all text-left flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">⏱️</span>
+                            <div>
+                                <p class="text-sm font-bold text-white">Modo Automático (Pelo Horário)</p>
+                                <p class="text-[11px] text-gray-400">Abre e fecha sozinho nos dias e horários da loja</p>
+                            </div>
+                        </div>
+                        <span id="badge-mode-auto" class="text-xs font-bold"></span>
+                    </button>
+
+                    <button type="button" onclick="setStoreMode('open')" id="btn-mode-open" class="w-full p-3 rounded-xl border transition-all text-left flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🟢</span>
+                            <div>
+                                <p class="text-sm font-bold text-white">Forçar ABERTO Agora</p>
+                                <p class="text-[11px] text-gray-400">Permite pedidos mesmo fora do horário normal</p>
+                            </div>
+                        </div>
+                        <span id="badge-mode-open" class="text-xs font-bold"></span>
+                    </button>
+
+                    <button type="button" onclick="setStoreMode('closed')" id="btn-mode-closed" class="w-full p-3 rounded-xl border transition-all text-left flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🔴</span>
+                            <div>
+                                <p class="text-sm font-bold text-white">Forçar FECHADO Agora</p>
+                                <p class="text-[11px] text-gray-400">Bloqueia novos pedidos imediatamente (acabou lanche, etc.)</p>
+                            </div>
+                        </div>
+                        <span id="badge-mode-closed" class="text-xs font-bold"></span>
+                    </button>
+                </div>
+
+                <!-- Atalho para WhatsApp -->
+                <div class="bg-black/50 p-3.5 rounded-xl border border-gray-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-300">📱 Salvar Atalho no seu WhatsApp:</span>
+                    </div>
+                    <p class="text-[11px] text-gray-400 leading-tight">Envie esse link para sua conversa no WhatsApp. Ao clicar nele pelo celular, este painel abre direto:</p>
+                    <button type="button" onclick="copyAdminWhatsAppLink()" class="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors shadow-md">
+                        <i class="fa-brands fa-whatsapp text-base"></i> Copiar Link de Acesso do ADM
+                    </button>
+                </div>
+
+                <!-- Trocar PIN e Sair -->
+                <div class="pt-2 border-t border-gray-800 flex justify-between items-center text-xs">
+                    <button type="button" onclick="promptChangePin()" class="text-orange-400 hover:text-orange-300 font-semibold underline">
+                        Alterar senha PIN
+                    </button>
+                    <button type="button" onclick="handleAdminLogout()" class="text-gray-500 hover:text-red-400">
+                        Sair do Painel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BARRA FIXA FLUTUANTE MOBILE -->
     <div id="mobile-cart-bar" class="fixed bottom-0 left-0 right-0 p-3 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-orange-500/40 z-40 sm:hidden hidden shadow-2xl">
         <button onclick="openCart()" class="w-full bg-green-600 active:bg-green-700 text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-between shadow-lg shadow-green-600/40">
@@ -687,6 +805,25 @@
         const EXTRA_MEAT_MAX = 5;
         const PIX_KEY = "romulossjunior2@gmail.com";
 
+        // Configuração da Loja e Acesso Administrativo
+        const STORE_CONFIG = {
+            kvAppKey: 'pzkrpe15',
+            defaultPin: '1234',
+            schedule: {
+                days: [3, 4, 5, 6, 0], // Quarta(3), Quinta(4), Sexta(5), Sábado(6), Domingo(0)
+                openHour: 19,
+                openMinute: 0,
+                closeHour: 23,
+                closeMinute: 45
+            },
+            scheduleText: "Quarta a Domingo das 19h00 às 23h45"
+        };
+
+        let storeCloudMode = 'auto'; // 'auto', 'open', 'closed'
+        let isAdminAuthenticated = false;
+        let logoClickCount = 0;
+        let logoClickTimer = null;
+
         let currentExtraMeat = 0;
         let cart = [];
         let currentModalItem = null;
@@ -777,6 +914,11 @@
         }
 
         function addDrinkDirect(id) {
+            if (!isStoreOpenNow()) {
+                showToast("A loja está FECHADA no momento! Horário: " + STORE_CONFIG.scheduleText);
+                return;
+            }
+
             const item = MENU_ITEMS.find(m => m.id === id);
             if (!item) return;
 
@@ -832,6 +974,15 @@
             badgeContainer.innerHTML = `<span class="${item.badgeColor || 'bg-black/80 text-orange-400'} px-3 py-1 rounded-full text-xs font-bold">${item.badge}</span>`;
 
             let optionsHtml = '';
+
+            if (!isStoreOpenNow()) {
+                optionsHtml += `
+                    <div class="bg-red-950/40 border border-red-500/50 p-3 rounded-xl text-center text-xs text-red-200 flex items-center justify-center gap-2 shadow-inner mb-4">
+                        <i class="fa-solid fa-lock text-red-400"></i>
+                        <span><strong>Loja Fechada:</strong> Horário: ${STORE_CONFIG.scheduleText}. Novos pedidos pausados!</span>
+                    </div>
+                `;
+            }
 
             if (item.isDrink) {
                 optionsHtml += `
@@ -1019,6 +1170,7 @@
                 cb.addEventListener('change', updateModalTotal);
             });
 
+            updateStoreStatusUI();
             document.getElementById('customize-modal').classList.add('active');
         }
 
@@ -1061,6 +1213,10 @@
         }
 
         function confirmAddToCart() {
+            if (!isStoreOpenNow()) {
+                showToast("A loja está FECHADA no momento! Horário: " + STORE_CONFIG.scheduleText);
+                return;
+            }
             if (!currentModalItem) return;
 
             if (currentModalItem.isDrink) {
@@ -1323,6 +1479,10 @@
         }
 
         function submitOrder() {
+            if (!isStoreOpenNow()) {
+                showToast("A loja está FECHADA no momento! Novos pedidos pausados.");
+                return;
+            }
             if (cart.length === 0) {
                 showToast("Adicione itens a sacola primeiro!");
                 return;
@@ -1594,12 +1754,305 @@
             setTimeout(() => t.classList.remove('show'), 3500);
         }
 
+        // ==========================================
+        // CONTROLE DE FUNCIONAMENTO & ADMINISTRAÇÃO
+        // ==========================================
+        function isStoreOpenNow() {
+            if (storeCloudMode === 'open') return true;
+            if (storeCloudMode === 'closed') return false;
+
+            try {
+                const now = new Date();
+                const spDateStr = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+                const sp = new Date(spDateStr);
+                const day = sp.getDay();
+                const currentMins = sp.getHours() * 60 + sp.getMinutes();
+                const openMins = STORE_CONFIG.schedule.openHour * 60 + STORE_CONFIG.schedule.openMinute;
+                const closeMins = STORE_CONFIG.schedule.closeHour * 60 + STORE_CONFIG.schedule.closeMinute;
+
+                if (!STORE_CONFIG.schedule.days.includes(day)) {
+                    return false;
+                }
+                return currentMins >= openMins && currentMins <= closeMins;
+            } catch (e) {
+                return true;
+            }
+        }
+
+        async function fetchStoreStatus() {
+            try {
+                const res = await fetch(`https://keyvalue.immanuel.co/api/KeyVal/GetValue/${STORE_CONFIG.kvAppKey}/store_status`, {
+                    cache: 'no-store'
+                });
+                if (res.ok) {
+                    const val = await res.json();
+                    if (val === 'open' || val === 'closed' || val === 'auto') {
+                        storeCloudMode = val;
+                    }
+                }
+            } catch (e) {
+                console.warn("Nuvem temporariamente inacessível, usando modo padrão/horário:", e);
+            }
+            updateStoreStatusUI();
+            if (document.getElementById('admin-modal')?.classList.contains('active')) {
+                updateAdminPanelUI();
+            }
+        }
+
+        function updateStoreStatusUI() {
+            const isOpen = isStoreOpenNow();
+
+            // 1. Badge na Navbar
+            const navBadge = document.getElementById('nav-store-status-badge');
+            if (navBadge) {
+                if (isOpen) {
+                    navBadge.innerHTML = `
+                        <span class="flex items-center gap-1.5 bg-green-950/80 text-green-400 border border-green-500/50 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                            <span>ABERTO</span>
+                        </span>
+                    `;
+                } else {
+                    navBadge.innerHTML = `
+                        <span class="flex items-center gap-1.5 bg-red-950/80 text-red-400 border border-red-500/50 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                            <span>FECHADO</span>
+                        </span>
+                    `;
+                }
+            }
+
+            // 2. Banner Superior
+            const banner = document.getElementById('store-closed-banner');
+            if (banner) {
+                if (isOpen) {
+                    banner.classList.add('hidden');
+                } else {
+                    banner.classList.remove('hidden');
+                }
+            }
+
+            // 3. Botão do Modal de Adicionar
+            const modalAddBtn = document.getElementById('btn-modal-add');
+            const modalAddLabel = document.getElementById('btn-modal-add-label');
+            if (modalAddBtn && modalAddLabel) {
+                if (isOpen) {
+                    modalAddBtn.disabled = false;
+                    modalAddBtn.className = "flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-between text-base shadow-lg shadow-green-600/30";
+                    modalAddLabel.textContent = "Adicionar à Sacola";
+                } else {
+                    modalAddBtn.disabled = true;
+                    modalAddBtn.className = "flex-1 bg-gray-800 text-gray-500 font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-between text-base cursor-not-allowed border border-gray-700";
+                    modalAddLabel.innerHTML = '<i class="fa-solid fa-lock text-sm mr-1"></i> Loja Fechada no Momento';
+                }
+            }
+
+            // 4. Botão de Finalizar Pedido no Carrinho
+            const submitBtn = document.getElementById('btn-submit-order');
+            if (submitBtn) {
+                if (isOpen) {
+                    submitBtn.disabled = cart.length === 0;
+                    submitBtn.innerHTML = `
+                        <i class="fa-brands fa-whatsapp text-2xl"></i>
+                        <span>Enviar Pedido no WhatsApp</span>
+                    `;
+                    submitBtn.className = "w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-3.5 px-4 rounded-xl text-base uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-600/40";
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <i class="fa-solid fa-lock text-xl"></i>
+                        <span>Loja Fechada para Novos Pedidos</span>
+                    `;
+                    submitBtn.className = "w-full bg-gray-800 text-gray-400 font-extrabold py-3.5 px-4 rounded-xl text-base uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-not-allowed border border-gray-700";
+                }
+            }
+        }
+
+        function handleLogoClick() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            logoClickCount++;
+            clearTimeout(logoClickTimer);
+            logoClickTimer = setTimeout(() => {
+                logoClickCount = 0;
+            }, 1500);
+            if (logoClickCount >= 3) {
+                logoClickCount = 0;
+                openAdminModal();
+            }
+        }
+
+        function openAdminModal() {
+            updateAdminPanelUI();
+            document.getElementById('admin-modal')?.classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal')?.classList.remove('active');
+        }
+
+        function getAdminPin() {
+            return localStorage.getItem('saifome_admin_pin') || STORE_CONFIG.defaultPin;
+        }
+
+        function handleAdminLogin(e) {
+            if (e) e.preventDefault();
+            const pin = document.getElementById('admin-pin-input')?.value?.trim();
+            if (pin === getAdminPin()) {
+                isAdminAuthenticated = true;
+                sessionStorage.setItem('saifome_admin_session', 'true');
+                showToast("Acesso de Administrador liberado!");
+                updateAdminPanelUI();
+            } else {
+                showToast("PIN incorreto! Tente novamente.");
+                const inp = document.getElementById('admin-pin-input');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        }
+
+        function handleAdminLogout() {
+            isAdminAuthenticated = false;
+            sessionStorage.removeItem('saifome_admin_session');
+            updateAdminPanelUI();
+            closeAdminModal();
+            showToast("Você saiu do painel.");
+        }
+
+        function promptChangePin() {
+            const currentPin = getAdminPin();
+            const oldPin = prompt("Digite seu PIN atual:");
+            if (oldPin === null) return;
+            if (oldPin !== currentPin) {
+                alert("PIN atual incorreto!");
+                return;
+            }
+            const newPin = prompt("Digite o NOVO PIN (mínimo 4 dígitos):");
+            if (newPin === null) return;
+            if (!newPin || newPin.trim().length < 4) {
+                alert("O novo PIN deve ter pelo menos 4 dígitos!");
+                return;
+            }
+            localStorage.setItem('saifome_admin_pin', newPin.trim());
+            showToast("Novo PIN salvo com sucesso!");
+        }
+
+        async function setStoreMode(newMode) {
+            showToast("Atualizando na nuvem...");
+            try {
+                const res = await fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${STORE_CONFIG.kvAppKey}/store_status/${newMode}`, {
+                    method: 'POST'
+                });
+                if (res.ok) {
+                    storeCloudMode = newMode;
+                    updateStoreStatusUI();
+                    updateAdminPanelUI();
+                    showToast("Status da loja atualizado com sucesso!");
+                } else {
+                    showToast("Erro ao conectar à nuvem. Tente novamente.");
+                }
+            } catch (e) {
+                showToast("Erro de conexão ao salvar status.");
+            }
+        }
+
+        function copyAdminWhatsAppLink() {
+            const adminUrl = window.location.origin + window.location.pathname + '?admin=1';
+            navigator.clipboard.writeText(adminUrl).then(() => {
+                showToast("Link copiado! Cole na conversa do seu WhatsApp.");
+            }).catch(() => {
+                showToast("Link: " + adminUrl);
+            });
+        }
+
+        function updateAdminPanelUI() {
+            const loginView = document.getElementById('admin-login-view');
+            const controlView = document.getElementById('admin-control-view');
+            if (!loginView || !controlView) return;
+
+            if (sessionStorage.getItem('saifome_admin_session') === 'true') {
+                isAdminAuthenticated = true;
+            }
+
+            if (!isAdminAuthenticated) {
+                loginView.classList.remove('hidden');
+                controlView.classList.add('hidden');
+                const inp = document.getElementById('admin-pin-input');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+                return;
+            }
+
+            loginView.classList.add('hidden');
+            controlView.classList.remove('hidden');
+
+            const isOpen = isStoreOpenNow();
+            const statusBox = document.getElementById('admin-current-status-box');
+            if (statusBox) {
+                let modeLabel = "Automático (Pelo Horário)";
+                if (storeCloudMode === 'open') modeLabel = "Forçado Aberto";
+                if (storeCloudMode === 'closed') modeLabel = "Forçado Fechado";
+
+                if (isOpen) {
+                    statusBox.className = "p-4 rounded-xl border border-green-500/50 bg-green-950/40 text-center transition-all";
+                    statusBox.innerHTML = `
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
+                            <span class="text-xl font-bold text-green-400 brand-font uppercase tracking-wide">LOJA ABERTA AGORA</span>
+                        </div>
+                        <p class="text-xs text-gray-300">Clientes conseguem pedir normalmente.</p>
+                        <span class="inline-block mt-2 text-[11px] bg-green-900/60 text-green-300 px-2.5 py-0.5 rounded-full border border-green-700/50">Modo ativo: ${modeLabel}</span>
+                    `;
+                } else {
+                    statusBox.className = "p-4 rounded-xl border border-red-500/50 bg-red-950/40 text-center transition-all";
+                    statusBox.innerHTML = `
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                            <span class="text-xl font-bold text-red-400 brand-font uppercase tracking-wide">LOJA FECHADA AGORA</span>
+                        </div>
+                        <p class="text-xs text-gray-300">Pedidos bloqueados no site.</p>
+                        <span class="inline-block mt-2 text-[11px] bg-red-900/60 text-red-300 px-2.5 py-0.5 rounded-full border border-red-700/50">Modo ativo: ${modeLabel}</span>
+                    `;
+                }
+            }
+
+            const modes = ['auto', 'open', 'closed'];
+            modes.forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                const badge = document.getElementById(`badge-mode-${m}`);
+                if (!btn || !badge) return;
+
+                if (storeCloudMode === m) {
+                    btn.className = "w-full p-3 rounded-xl border-2 border-orange-500 bg-orange-500/10 transition-all text-left flex items-center justify-between shadow-md";
+                    badge.textContent = "ATIVO";
+                    badge.className = "text-xs font-bold text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded-full border border-orange-500/40";
+                } else {
+                    btn.className = "w-full p-3 rounded-xl border border-gray-800 bg-black/40 hover:border-gray-700 transition-all text-left flex items-center justify-between";
+                    badge.textContent = "";
+                    badge.className = "";
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderMenu('todos');
             updateCartUI();
             updateSavedCount();
+            fetchStoreStatus();
 
-            ['customize-modal', 'success-modal', 'history-modal'].forEach(id => {
+            // Sincronização periódica da nuvem a cada 45s
+            setInterval(fetchStoreStatus, 45000);
+
+            // Se o link contiver ?admin=1 ou #admin, abre o painel do dono automaticamente
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === '1' || window.location.hash === '#admin') {
+                setTimeout(openAdminModal, 400);
+            }
+
+            ['customize-modal', 'success-modal', 'history-modal', 'admin-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('click', (e) => {
