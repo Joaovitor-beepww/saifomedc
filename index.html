@@ -552,7 +552,7 @@
 
     <!-- MODAL DO ADMINISTRADOR -->
     <div id="admin-modal" class="modal-overlay">
-        <div class="modal-card-mobile bg-[#18181b] border border-orange-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+        <div class="modal-card-mobile bg-[#18181b] border border-orange-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">✕</button>
 
             <!-- Login do Admin (se não autenticado) -->
@@ -567,14 +567,14 @@
                 <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5 text-left">PIN de Acesso</label>
-                        <input type="password" id="admin-pin-input" maxlength="12" placeholder="Digite seu PIN (Padrão: 1234)" class="w-full text-center tracking-widest text-lg bg-black/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 font-mono">
+                        <input type="password" id="admin-pin-input" maxlength="20" placeholder="Digite seu PIN" class="w-full text-center tracking-widest text-lg bg-black/60 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 font-mono">
                     </div>
                     <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-extrabold py-3.5 rounded-xl uppercase tracking-wider text-sm transition-all shadow-lg shadow-orange-500/30">
                         Entrar no Painel
                     </button>
                     <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1">
-                        <span>Padrão de fábrica: <strong class="text-white">1234</strong></span>
-                        <button type="button" onclick="resetAdminPin()" class="text-orange-400 hover:text-orange-300 font-semibold underline">Esqueci / Redefinir PIN</button>
+                        <span>Acesso Restrito ao Dono</span>
+                        <button type="button" onclick="resetAdminPin()" class="text-orange-400 hover:text-orange-300 font-semibold underline">Esqueci o PIN</button>
                     </div>
                 </form>
             </div>
@@ -627,6 +627,50 @@
                             </div>
                         </div>
                         <span id="badge-mode-closed" class="text-xs font-bold"></span>
+                    </button>
+                </div>
+
+                <!-- Configuração de Dias e Horários do Modo Automático -->
+                <div class="bg-black/50 border border-gray-800 rounded-xl p-4 space-y-3.5">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">📅</span>
+                            <span class="text-xs font-bold text-white uppercase tracking-wider">Horários do Modo Automático</span>
+                        </div>
+                        <span class="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/30">Nuvem</span>
+                    </div>
+
+                    <!-- Seleção dos Dias -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Dias de Funcionamento:</label>
+                        <div class="grid grid-cols-7 gap-1" id="sched-days-selector">
+                            <!-- Gerado via JS: botões de Dom a Sáb -->
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-1">Toque para ativar (verde) ou desativar (cinza).</p>
+                    </div>
+
+                    <!-- Horários de Abertura e Fechamento -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Abre às:</label>
+                            <input type="time" id="sched-input-open" onchange="updateSchedulePreview()" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2.5 py-2 text-white font-mono text-center text-sm focus:outline-none focus:border-orange-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Fecha às:</label>
+                            <input type="time" id="sched-input-close" onchange="updateSchedulePreview()" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2.5 py-2 text-white font-mono text-center text-sm focus:outline-none focus:border-orange-500">
+                        </div>
+                    </div>
+
+                    <!-- Preview do Horário -->
+                    <div class="bg-zinc-900/80 p-2.5 rounded-lg border border-gray-800 text-center">
+                        <span class="text-[10px] text-gray-400 block font-bold uppercase tracking-wider mb-0.5">Texto no site para os clientes:</span>
+                        <span id="sched-preview-text" class="text-xs font-bold text-orange-400">Quarta a Domingo das 19h00 às 23h45</span>
+                    </div>
+
+                    <!-- Botão Salvar Horários -->
+                    <button type="button" onclick="saveScheduleFromAdmin()" id="btn-save-schedule" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-extrabold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md shadow-orange-500/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-sm"></i>
+                        <span>Salvar Horário na Nuvem</span>
                     </button>
                 </div>
 
@@ -812,6 +856,7 @@
         const STORE_CONFIG = {
             kvAppKey: 'pzkrpe15',
             defaultPin: '1234',
+            recoveryKey: 'SAIFOME@ADM', // Chave-Mestra Secreta de Recuperação
             schedule: {
                 days: [3, 4, 5, 6, 0], // Quarta(3), Quinta(4), Sexta(5), Sábado(6), Domingo(0)
                 openHour: 19,
@@ -822,6 +867,7 @@
             scheduleText: "Quarta a Domingo das 19h00 às 23h45"
         };
 
+        let adminScheduleDays = [...STORE_CONFIG.schedule.days];
         let storeCloudMode = 'auto'; // 'auto', 'open', 'closed'
         let isAdminAuthenticated = false;
         let logoClickCount = 0;
@@ -1760,6 +1806,183 @@
         // ==========================================
         // CONTROLE DE FUNCIONAMENTO & ADMINISTRAÇÃO
         // ==========================================
+        function formatScheduleText(days, openTime, closeTime) {
+            const shortNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            if (!days || days.length === 0) return 'Nenhum dia configurado';
+            const oStr = (openTime || "19:00").replace(':', 'h');
+            const cStr = (closeTime || "23:45").replace(':', 'h');
+            if (days.length === 7) return `Todos os dias das ${oStr} às ${cStr}`;
+
+            const set = new Set(days);
+            const has = d => set.has(d);
+            let dayDesc = '';
+            if (days.length === 5 && has(3) && has(4) && has(5) && has(6) && has(0)) {
+                dayDesc = 'Quarta a Domingo';
+            } else if (days.length === 5 && has(1) && has(2) && has(3) && has(4) && has(5)) {
+                dayDesc = 'Segunda a Sexta';
+            } else if (days.length === 6 && has(1) && has(2) && has(3) && has(4) && has(5) && has(6)) {
+                dayDesc = 'Segunda a Sábado';
+            } else if (days.length === 4 && has(4) && has(5) && has(6) && has(0)) {
+                dayDesc = 'Quinta a Domingo';
+            } else if (days.length === 3 && has(5) && has(6) && has(0)) {
+                dayDesc = 'Sexta a Domingo';
+            } else {
+                const order = [1, 2, 3, 4, 5, 6, 0];
+                const selectedOrdered = order.filter(d => set.has(d)).map(d => shortNames[d]);
+                dayDesc = selectedOrdered.join(', ');
+            }
+            return `${dayDesc} das ${oStr} às ${cStr}`;
+        }
+
+        function parseScheduleString(str) {
+            if (!str || typeof str !== 'string' || !str.includes('_')) return null;
+            const parts = str.trim().split('_');
+            if (parts.length < 3) return null;
+            const days = parts[0] ? parts[0].split(',').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 6) : [];
+            const openParts = parts[1].split('-');
+            const closeParts = parts[2].split('-');
+            const openHour = parseInt(openParts[0], 10) || 0;
+            const openMinute = parseInt(openParts[1], 10) || 0;
+            const closeHour = parseInt(closeParts[0], 10) || 0;
+            const closeMinute = parseInt(closeParts[1], 10) || 0;
+            const openTimeStr = String(openHour).padStart(2, '0') + ':' + String(openMinute).padStart(2, '0');
+            const closeTimeStr = String(closeHour).padStart(2, '0') + ':' + String(closeMinute).padStart(2, '0');
+            return {
+                days,
+                openHour,
+                openMinute,
+                closeHour,
+                closeMinute,
+                openTimeStr,
+                closeTimeStr,
+                scheduleText: formatScheduleText(days, openTimeStr, closeTimeStr)
+            };
+        }
+
+        function applyScheduleString(str) {
+            const parsed = parseScheduleString(str);
+            if (!parsed) return;
+            STORE_CONFIG.schedule.days = parsed.days;
+            STORE_CONFIG.schedule.openHour = parsed.openHour;
+            STORE_CONFIG.schedule.openMinute = parsed.openMinute;
+            STORE_CONFIG.schedule.closeHour = parsed.closeHour;
+            STORE_CONFIG.schedule.closeMinute = parsed.closeMinute;
+            STORE_CONFIG.scheduleText = parsed.scheduleText;
+
+            const bannerEl = document.getElementById('closed-banner-schedule');
+            if (bannerEl) bannerEl.textContent = parsed.scheduleText;
+
+            adminScheduleDays = [...parsed.days];
+            const openInp = document.getElementById('sched-input-open');
+            const closeInp = document.getElementById('sched-input-close');
+            if (openInp) openInp.value = parsed.openTimeStr;
+            if (closeInp) closeInp.value = parsed.closeTimeStr;
+            const prevEl = document.getElementById('sched-preview-text');
+            if (prevEl) prevEl.textContent = parsed.scheduleText;
+        }
+
+        function renderScheduleEditorUI() {
+            const container = document.getElementById('sched-days-selector');
+            if (!container) return;
+            const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const isSel = adminScheduleDays.includes(i);
+                const cls = isSel 
+                    ? "bg-green-600 border-green-500 text-white font-bold shadow-sm" 
+                    : "bg-gray-800/80 border-gray-700 text-gray-400 hover:border-gray-600";
+                html += `<button type="button" onclick="toggleScheduleDay(${i})" class="py-2 text-[11px] rounded-lg border text-center transition-all ${cls}">${DAY_NAMES[i]}</button>`;
+            }
+            container.innerHTML = html;
+
+            const openInput = document.getElementById('sched-input-open');
+            const closeInput = document.getElementById('sched-input-close');
+            if (openInput && !openInput.value) {
+                openInput.value = String(STORE_CONFIG.schedule.openHour).padStart(2, '0') + ':' + String(STORE_CONFIG.schedule.openMinute).padStart(2, '0');
+            }
+            if (closeInput && !closeInput.value) {
+                closeInput.value = String(STORE_CONFIG.schedule.closeHour).padStart(2, '0') + ':' + String(STORE_CONFIG.schedule.closeMinute).padStart(2, '0');
+            }
+
+            updateSchedulePreview();
+        }
+
+        function toggleScheduleDay(dayIdx) {
+            if (adminScheduleDays.includes(dayIdx)) {
+                if (adminScheduleDays.length === 1) {
+                    showToast("Mantenha ao menos 1 dia selecionado!");
+                    return;
+                }
+                adminScheduleDays = adminScheduleDays.filter(d => d !== dayIdx);
+            } else {
+                adminScheduleDays.push(dayIdx);
+                adminScheduleDays.sort((a, b) => a - b);
+            }
+            renderScheduleEditorUI();
+        }
+
+        function updateSchedulePreview() {
+            const openVal = document.getElementById('sched-input-open')?.value || "19:00";
+            const closeVal = document.getElementById('sched-input-close')?.value || "23:45";
+            const prevEl = document.getElementById('sched-preview-text');
+            if (prevEl) {
+                prevEl.textContent = formatScheduleText(adminScheduleDays, openVal, closeVal);
+            }
+        }
+
+        async function saveScheduleFromAdmin() {
+            const openVal = document.getElementById('sched-input-open')?.value;
+            const closeVal = document.getElementById('sched-input-close')?.value;
+            if (!openVal || !closeVal) {
+                showToast("Preencha o horário de abertura e fechamento!");
+                return;
+            }
+            if (!adminScheduleDays || adminScheduleDays.length === 0) {
+                showToast("Selecione ao menos 1 dia de funcionamento!");
+                return;
+            }
+
+            const encodedStr = `${adminScheduleDays.join(',')}_${openVal.replace(':', '-')}_${closeVal.replace(':', '-')}`;
+            showToast("Salvando novo horário na nuvem...");
+
+            const saveBtn = document.getElementById('btn-save-schedule');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Salvando...</span>';
+            }
+
+            try {
+                const res = await fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${STORE_CONFIG.kvAppKey}/store_schedule/${encodedStr}`, {
+                    method: 'POST'
+                });
+                if (res.ok) {
+                    localStorage.setItem('saifome_store_schedule', encodedStr);
+                    applyScheduleString(encodedStr);
+                    updateStoreStatusUI();
+                    updateAdminPanelUI();
+                    showToast("Horário salvo na nuvem com sucesso!");
+                } else {
+                    showToast("Erro ao salvar na nuvem. Salvo localmente.");
+                    localStorage.setItem('saifome_store_schedule', encodedStr);
+                    applyScheduleString(encodedStr);
+                    updateStoreStatusUI();
+                    updateAdminPanelUI();
+                }
+            } catch (e) {
+                localStorage.setItem('saifome_store_schedule', encodedStr);
+                applyScheduleString(encodedStr);
+                updateStoreStatusUI();
+                updateAdminPanelUI();
+                showToast("Horário salvo localmente no aparelho.");
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk text-sm"></i> <span>Salvar Horário na Nuvem</span>';
+                }
+            }
+        }
+
         function isStoreOpenNow() {
             if (storeCloudMode === 'open') return true;
             if (storeCloudMode === 'closed') return false;
@@ -1773,10 +1996,15 @@
                 const openMins = STORE_CONFIG.schedule.openHour * 60 + STORE_CONFIG.schedule.openMinute;
                 const closeMins = STORE_CONFIG.schedule.closeHour * 60 + STORE_CONFIG.schedule.closeMinute;
 
-                if (!STORE_CONFIG.schedule.days.includes(day)) {
+                if (openMins <= closeMins) {
+                    if (!STORE_CONFIG.schedule.days.includes(day)) return false;
+                    return currentMins >= openMins && currentMins <= closeMins;
+                } else {
+                    if (STORE_CONFIG.schedule.days.includes(day) && currentMins >= openMins) return true;
+                    const prevDay = (day + 6) % 7;
+                    if (STORE_CONFIG.schedule.days.includes(prevDay) && currentMins <= closeMins) return true;
                     return false;
                 }
-                return currentMins >= openMins && currentMins <= closeMins;
             } catch (e) {
                 return true;
             }
@@ -1794,8 +2022,23 @@
                     }
                 }
             } catch (e) {
-                console.warn("Nuvem temporariamente inacessível, usando modo padrão/horário:", e);
+                console.warn("Nuvem inacessível para store_status:", e);
             }
+
+            try {
+                const schedRes = await fetch(`https://keyvalue.immanuel.co/api/KeyVal/GetValue/${STORE_CONFIG.kvAppKey}/store_schedule`, {
+                    cache: 'no-store'
+                });
+                if (schedRes.ok) {
+                    const schedVal = await schedRes.json();
+                    if (schedVal && typeof schedVal === 'string' && schedVal.includes('_')) {
+                        applyScheduleString(schedVal);
+                    }
+                }
+            } catch (e) {
+                console.warn("Nuvem inacessível para store_schedule:", e);
+            }
+
             updateStoreStatusUI();
             if (document.getElementById('admin-modal')?.classList.contains('active')) {
                 updateAdminPanelUI();
@@ -1898,11 +2141,21 @@
         }
 
         function resetAdminPin() {
-            if (confirm("Deseja redefinir o PIN do painel para o padrão de fábrica (1234)?")) {
-                localStorage.removeItem('saifome_admin_pin');
+            const key = prompt("Digite a Chave-Mestra Secreta de Recuperação:");
+            if (key === null) return;
+            if (key.trim() === STORE_CONFIG.recoveryKey) {
+                const newPin = prompt("Chave-Mestra confirmada com sucesso!\nDigite o NOVO PIN desejado (mínimo 4 dígitos):", "1234");
+                if (newPin === null) return;
+                if (!newPin || newPin.trim().length < 4) {
+                    alert("O PIN deve ter no mínimo 4 dígitos!");
+                    return;
+                }
+                localStorage.setItem('saifome_admin_pin', newPin.trim());
                 const inp = document.getElementById('admin-pin-input');
-                if (inp) inp.value = '1234';
-                showToast("PIN redefinido para 1234 com sucesso!");
+                if (inp) inp.value = newPin.trim();
+                showToast("Novo PIN configurado com sucesso!");
+            } else {
+                alert("Chave-Mestra incorreta! Acesso negado.");
             }
         }
 
@@ -1910,8 +2163,9 @@
             if (e) e.preventDefault();
             const pin = document.getElementById('admin-pin-input')?.value?.trim();
             const currentPin = getAdminPin();
-            // Permite o PIN atual OU o PIN padrão 1234 como chave-mestra de emergência
-            if (pin === currentPin || pin === STORE_CONFIG.defaultPin) {
+            
+            // Login permitido SOMENTE com o PIN ativo OU com a Chave-Mestra Secreta
+            if (pin === currentPin || pin === STORE_CONFIG.recoveryKey) {
                 isAdminAuthenticated = true;
                 sessionStorage.setItem('saifome_admin_session', 'true');
                 showToast("Acesso de Administrador liberado!");
@@ -2049,9 +2303,18 @@
                     badge.className = "";
                 }
             });
+
+            // Atualiza interface do editor de horários
+            renderScheduleEditorUI();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Carrega horário salvo em cache local previamente se existir
+            const cachedSched = localStorage.getItem('saifome_store_schedule');
+            if (cachedSched) {
+                applyScheduleString(cachedSched);
+            }
+
             renderMenu('todos');
             updateCartUI();
             updateSavedCount();
@@ -2060,11 +2323,14 @@
             // Sincronização periódica da nuvem a cada 45s
             setInterval(fetchStoreStatus, 45000);
 
-            // Se o link contiver reset_pin=1 ou reset=1, redefine o PIN automaticamente
+            // Recuperação via link direto com chave-mestra (ex: ?admin=1&chave=SAIFOME@ADM)
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('reset_pin') === '1' || urlParams.get('reset') === '1') {
+            const masterParam = urlParams.get('chave') || urlParams.get('recovery');
+            if (masterParam && masterParam.trim() === STORE_CONFIG.recoveryKey) {
                 localStorage.removeItem('saifome_admin_pin');
-                showToast("PIN de administrador redefinido para 1234!");
+                isAdminAuthenticated = true;
+                sessionStorage.setItem('saifome_admin_session', 'true');
+                showToast("Acesso liberado via Chave-Mestra!");
             }
 
             // Se o link contiver ?admin=1 ou #admin, abre o painel do dono automaticamente
