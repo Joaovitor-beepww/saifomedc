@@ -572,7 +572,10 @@
                     <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-extrabold py-3.5 rounded-xl uppercase tracking-wider text-sm transition-all shadow-lg shadow-orange-500/30">
                         Entrar no Painel
                     </button>
-                    <p class="text-[11px] text-gray-500 text-center">PIN padrão: <strong>1234</strong> (você pode alterar depois de entrar)</p>
+                    <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1">
+                        <span>Padrão de fábrica: <strong class="text-white">1234</strong></span>
+                        <button type="button" onclick="resetAdminPin()" class="text-orange-400 hover:text-orange-300 font-semibold underline">Esqueci / Redefinir PIN</button>
+                    </div>
                 </form>
             </div>
 
@@ -1894,10 +1897,21 @@
             return localStorage.getItem('saifome_admin_pin') || STORE_CONFIG.defaultPin;
         }
 
+        function resetAdminPin() {
+            if (confirm("Deseja redefinir o PIN do painel para o padrão de fábrica (1234)?")) {
+                localStorage.removeItem('saifome_admin_pin');
+                const inp = document.getElementById('admin-pin-input');
+                if (inp) inp.value = '1234';
+                showToast("PIN redefinido para 1234 com sucesso!");
+            }
+        }
+
         function handleAdminLogin(e) {
             if (e) e.preventDefault();
             const pin = document.getElementById('admin-pin-input')?.value?.trim();
-            if (pin === getAdminPin()) {
+            const currentPin = getAdminPin();
+            // Permite o PIN atual OU o PIN padrão 1234 como chave-mestra de emergência
+            if (pin === currentPin || pin === STORE_CONFIG.defaultPin) {
                 isAdminAuthenticated = true;
                 sessionStorage.setItem('saifome_admin_session', 'true');
                 showToast("Acesso de Administrador liberado!");
@@ -2046,8 +2060,14 @@
             // Sincronização periódica da nuvem a cada 45s
             setInterval(fetchStoreStatus, 45000);
 
-            // Se o link contiver ?admin=1 ou #admin, abre o painel do dono automaticamente
+            // Se o link contiver reset_pin=1 ou reset=1, redefine o PIN automaticamente
             const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('reset_pin') === '1' || urlParams.get('reset') === '1') {
+                localStorage.removeItem('saifome_admin_pin');
+                showToast("PIN de administrador redefinido para 1234!");
+            }
+
+            // Se o link contiver ?admin=1 ou #admin, abre o painel do dono automaticamente
             if (urlParams.get('admin') === '1' || window.location.hash === '#admin') {
                 setTimeout(openAdminModal, 400);
             }
